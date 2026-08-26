@@ -38,7 +38,7 @@ public class JobController {
     public ResponseEntity<Void> createJob(@Valid @RequestBody CreateJobRequest request) {
         UUID jobId = jobService.createJob(request);
 
-        URI location = URI.create("/jobs/" + jobId);
+        URI location = URI.create("/api/jobs/" + jobId);
 
         return ResponseEntity.created(location).build();
     }

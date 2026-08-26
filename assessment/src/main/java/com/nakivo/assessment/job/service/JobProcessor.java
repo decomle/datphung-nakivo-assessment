@@ -18,7 +18,7 @@ public class JobProcessor {
     private final JobRepository jobRepository;
 
     @Value("${job.max-retries}")
-    private int maxReties;
+    private int maxRetries;
 
     @Transactional
     public ProcessingResult process(UUID jobId) {
@@ -51,7 +51,7 @@ public class JobProcessor {
                 "Processing failed. Attempt " + retryCount + " of 3."
         );
 
-        if (retryCount >= 3) {
+        if (retryCount >= maxRetries) {
             job.setStatus(JobStatus.FAILED);
             return ProcessingResult.FAILED;
         }

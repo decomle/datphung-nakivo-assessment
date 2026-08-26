@@ -39,7 +39,7 @@ public class JobService {
                 .retryCount(0)
             .build();
 
-        jobRepository.save(job);
+        job = jobRepository.save(job);
         return job.getId();
     }
 
