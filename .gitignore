@@ -26,3 +26,5 @@ replay_pid*
 assessment/data/mydb.mv.db
 
 assessment/data/mydb.trace.db
+
+assessment/data/mydb.lock.db

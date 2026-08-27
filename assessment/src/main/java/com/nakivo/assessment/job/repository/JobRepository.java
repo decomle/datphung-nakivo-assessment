@@ -22,7 +22,7 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
         WHERE status = :status
         ORDER BY created_at ASC
         LIMIT :limit
-        FOR UPDATE
+        FOR UPDATE SKIP LOCKED
         """, nativeQuery = true)
     List<Job> findPendingJobsForUpdate( @Param("status") String status, @Param("limit") int limit);
 }
