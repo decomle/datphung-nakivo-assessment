@@ -90,7 +90,7 @@ public class JobControllerTest {
                             }
                             """))
                 .andExpect(status().isCreated())
-                .andExpect(content().string(""))
+                .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(header().string("Location", "/api/jobs/" + id));
 
         verify(jobService).createJob(any());
@@ -153,5 +153,12 @@ public class JobControllerTest {
                 .andExpect(jsonPath("$.total").value(115));
 
         verify(jobService).processPendingJobs();
+    }
+
+    @Test
+    void getJobs_withInvalidPagination_shouldReturn400() throws Exception {
+        mockMvc.perform(get("/api/jobs").param("page", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 }

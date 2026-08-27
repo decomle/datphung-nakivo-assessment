@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"type\": \"EMAIL\",\n  \"payload\": {\n    \"recipient\": \"test@example.com\",\n    \"subject\": \"Hello\",\n    \"body\": \"Test message\",\n    \"fail\": false\n  }\n}",
+					"raw": "{\n  \"type\": \"EMAIL\",\n  \"payload\": {\n    \"recipient\": \"test@example.com\",\n    \"subject\": \"Hello\",\n    \"body\": \"Test message\",\n    \"fail\": true\n  }\n}",
 					"options": {
 						"raw": {
 							"language": "json"

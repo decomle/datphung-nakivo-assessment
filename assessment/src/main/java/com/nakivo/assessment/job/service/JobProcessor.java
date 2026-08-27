@@ -27,12 +27,15 @@ public class JobProcessor {
         if(job == null) {
             return ProcessingResult.FAILED;
         }
-        if (shouldFail(job)) {
-            return handleFailure(job);
+        try {
+            if (shouldFail(job)) {
+                return handleFailure(job, null);
+            }
+            complete(job);
+            return ProcessingResult.COMPLETED;
+        } catch (RuntimeException ex) {
+            return handleFailure(job, ex.getMessage());
         }
-        complete(job);
-        return ProcessingResult.COMPLETED;
-
     }
 
     private boolean shouldFail(Job job) {
@@ -43,13 +46,14 @@ public class JobProcessor {
 
     }
 
-    private ProcessingResult handleFailure(Job job) {
+    private ProcessingResult handleFailure(Job job, String cause) {
         int retryCount = job.getRetryCount() + 1;
 
         job.setRetryCount(retryCount);
-        job.setErrorMessage(
-                "Processing failed. Attempt " + retryCount + " of " + maxRetries
-        );
+        String attemptMessage = "Processing failed. Attempt " + retryCount + " of " + maxRetries;
+        job.setErrorMessage(cause == null || cause.isBlank()
+                ? attemptMessage
+                : attemptMessage + ": " + cause);
 
         if (retryCount >= maxRetries) {
             job.setStatus(JobStatus.FAILED);

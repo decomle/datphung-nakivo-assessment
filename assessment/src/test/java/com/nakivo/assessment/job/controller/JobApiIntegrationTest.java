@@ -59,7 +59,8 @@ class JobApiIntegrationTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"));
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").isNotEmpty());
 
         List<Job> jobs = jobRepository.findAll();
 
@@ -138,6 +139,13 @@ class JobApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    @Test
+    void getJobs_shouldRejectInvalidPagination() throws Exception {
+        mockMvc.perform(get("/api/jobs").param("page", "-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
     }
 
     @Test

@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -196,5 +197,24 @@ class JobProcessorTest {
 
         assertEquals(ProcessingResult.COMPLETED, result);
         assertEquals(JobStatus.COMPLETED, job.getStatus());
+    }
+
+    @Test
+    void process_whenPayloadIsMalformed_shouldRetryAndRecordError() {
+        UUID id = UUID.randomUUID();
+        Job job = Job.builder()
+                .id(id)
+                .payload("not-json")
+                .status(JobStatus.PROCESSING)
+                .retryCount(0)
+                .build();
+        when(jobRepository.findById(id)).thenReturn(Optional.of(job));
+
+        ProcessingResult result = jobProcessor.process(id);
+
+        assertEquals(ProcessingResult.RETRYING, result);
+        assertEquals(JobStatus.PENDING, job.getStatus());
+        assertEquals(1, job.getRetryCount());
+        assertTrue(job.getErrorMessage().startsWith("Processing failed. Attempt 1 of 3:"));
     }
 }

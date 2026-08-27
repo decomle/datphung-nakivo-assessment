@@ -39,7 +39,7 @@ cd assessment
 The integration tests use an in-memory H2 database and the `test` profile.
 
 ## API
-For more convinience, import the Postman collection at `postman/Naviko - Tech Assessment.postman_collection.json`, and use it to test the endpoints
+For convenience, import the Postman collection at `postman/Naviko - Tech Assessment.postman_collection.json` and use it to test the endpoints.
 
 ### Create a job
 
@@ -56,8 +56,9 @@ curl -i -X POST http://localhost:8080/api/jobs \
 	}'
 ```
 
-The response is `201 Created` with a `Location` header containing the new job
-URL. New jobs start with status `PENDING` and retry count `0`.
+The response is `201 Created`, with an `id` response body field and a `Location`
+header containing the new job URL. New jobs start with status `PENDING` and
+retry count `0`.
 
 ### Get a job
 
@@ -117,7 +118,7 @@ also need recovery for jobs left in `PROCESSING` after a worker crash, such as a
 lease or visibility timeout, and would need monitoring and alerting for stuck or
 repeatedly failing jobs.
 
-The batch size and retry policy is configured at `applications.properties`
+The batch size and retry policy are configured in `application.properties`.
 
 ```
 job.batch-size=100
