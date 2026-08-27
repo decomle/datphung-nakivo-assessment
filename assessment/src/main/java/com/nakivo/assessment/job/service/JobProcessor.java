@@ -38,7 +38,7 @@ public class JobProcessor {
     private boolean shouldFail(Job job) {
         return job.getPayload() != null
                 && objectMapper.readTree(job.getPayload())
-                .path("failed")
+                .path("fail")
                 .asBoolean(false);
 
     }
@@ -48,7 +48,7 @@ public class JobProcessor {
 
         job.setRetryCount(retryCount);
         job.setErrorMessage(
-                "Processing failed. Attempt " + retryCount + " of 3."
+                "Processing failed. Attempt " + retryCount + " of " + maxRetries
         );
 
         if (retryCount >= maxRetries) {

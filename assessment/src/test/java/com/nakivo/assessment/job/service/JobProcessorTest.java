@@ -82,7 +82,7 @@ class JobProcessorTest {
         Job job = Job.builder()
                 .id(id)
                 .payload("""
-                        {"failed":true}
+                        {"fail":true}
                         """)
                 .status(JobStatus.PROCESSING)
                 .retryCount(0)
@@ -97,7 +97,7 @@ class JobProcessorTest {
         assertEquals(JobStatus.PENDING, job.getStatus());
         assertEquals(1, job.getRetryCount());
         assertEquals(
-                "Processing failed. Attempt 1 of 3.",
+                "Processing failed. Attempt 1 of 3",
                 job.getErrorMessage()
         );
     }
@@ -109,7 +109,7 @@ class JobProcessorTest {
         Job job = Job.builder()
                 .id(id)
                 .payload("""
-                        {"failed":true}
+                        {"fail":true}
                         """)
                 .status(JobStatus.PROCESSING)
                 .retryCount(1)
@@ -124,7 +124,7 @@ class JobProcessorTest {
         assertEquals(JobStatus.PENDING, job.getStatus());
         assertEquals(2, job.getRetryCount());
         assertEquals(
-                "Processing failed. Attempt 2 of 3.",
+                "Processing failed. Attempt 2 of 3",
                 job.getErrorMessage()
         );
     }
@@ -136,7 +136,7 @@ class JobProcessorTest {
         Job job = Job.builder()
                 .id(id)
                 .payload("""
-                        {"failed":true}
+                        {"fail":true}
                         """)
                 .status(JobStatus.PROCESSING)
                 .retryCount(2)
@@ -151,7 +151,7 @@ class JobProcessorTest {
         assertEquals(JobStatus.FAILED, job.getStatus());
         assertEquals(3, job.getRetryCount());
         assertEquals(
-                "Processing failed. Attempt 3 of 3.",
+                "Processing failed. Attempt 3 of 3",
                 job.getErrorMessage()
         );
     }

@@ -144,7 +144,7 @@ class JobApiIntegrationTest {
         createJob(
                 "EMAIL",
                 """
-                {"failed":true}
+                {"fail":true}
                 """,
                 JobStatus.PENDING
         );
@@ -161,12 +161,12 @@ class JobApiIntegrationTest {
         assertEquals(2, jobs.size());
 
         Job completedJob = jobs.stream()
-                .filter(job -> !job.getPayload().contains("\"failed\""))
+                .filter(job -> !job.getPayload().contains("\"fail\""))
                 .findFirst()
                 .orElseThrow();
 
         Job retryingJob = jobs.stream()
-                .filter(job -> job.getPayload().contains("\"failed\""))
+                .filter(job -> job.getPayload().contains("\"fail\""))
                 .findFirst()
                 .orElseThrow();
 

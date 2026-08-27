@@ -53,7 +53,7 @@ public class JobProcessorIntegrationTest {
     @Test
     void process_shouldRetryFailedJob() {
         Job job = createJob("""
-                {"failed":true}
+                {"fail":true}
                 """);
 
         ProcessingResult result = jobProcessor.process(job.getId());
@@ -65,7 +65,7 @@ public class JobProcessorIntegrationTest {
         assertEquals(JobStatus.PENDING, updated.getStatus());
         assertEquals(1, updated.getRetryCount());
         assertEquals(
-                "Processing failed. Attempt 1 of 3.",
+                "Processing failed. Attempt 1 of 3",
                 updated.getErrorMessage()
         );
     }
@@ -73,7 +73,7 @@ public class JobProcessorIntegrationTest {
     @Test
     void process_shouldFailJobAfterMaxRetries() {
         Job job = createJob("""
-                {"failed":true}
+                {"fail":true}
                 """);
 
         job.setRetryCount(2);
@@ -88,7 +88,7 @@ public class JobProcessorIntegrationTest {
         assertEquals(JobStatus.FAILED, updated.getStatus());
         assertEquals(3, updated.getRetryCount());
         assertEquals(
-                "Processing failed. Attempt 3 of 3.",
+                "Processing failed. Attempt 3 of 3",
                 updated.getErrorMessage()
         );
     }
