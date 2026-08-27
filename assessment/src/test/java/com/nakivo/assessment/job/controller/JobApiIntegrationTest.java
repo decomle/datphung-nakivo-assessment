@@ -12,9 +12,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +37,9 @@ class JobApiIntegrationTest {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -175,11 +184,55 @@ class JobApiIntegrationTest {
         assertEquals(1, retryingJob.getRetryCount());
     }
 
-    private Job createJob(
-            String type,
-            String payload,
-            JobStatus status
-    ) {
+    @Test
+    void processJobs_calledConcurrently_shouldProcessJobOnlyOnce() throws Exception {
+        Job job = createJob(
+                "EMAIL",
+                """
+                {"recipient":"success@test.com"}
+                """,
+                JobStatus.PENDING
+        );
+
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Future<String> firstResponse = submitProcessRequest(executor, start);
+            Future<String> secondResponse = submitProcessRequest(executor, start);
+
+            start.countDown();
+
+            int firstTotal = objectMapper.readTree(
+                    firstResponse.get(5, TimeUnit.SECONDS)
+            ).path("total").asInt();
+
+            int secondTotal = objectMapper.readTree(
+                    secondResponse.get(5, TimeUnit.SECONDS)
+            ).path("total").asInt();
+
+            assertEquals(1, firstTotal + secondTotal);
+            assertEquals(
+                    JobStatus.COMPLETED,
+                    jobRepository.findById(job.getId()).orElseThrow().getStatus()
+            );
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private Future<String> submitProcessRequest(ExecutorService executor, CountDownLatch start) {
+        return executor.submit(() -> {
+            start.await();
+            return mockMvc.perform(post("/api/jobs/process"))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString();
+        });
+    }
+
+    private Job createJob(String type, String payload, JobStatus status) {
         Job job = Job.builder()
                 .type(type)
                 .payload(payload)

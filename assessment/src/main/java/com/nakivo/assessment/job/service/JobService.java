@@ -80,7 +80,7 @@ public class JobService {
             }
         }
 
-        return new ProcessJobsResponse(completed, failed, retries, completed + failed + retries);
+        return new ProcessJobsResponse(completed, failed, retries, jobIds.size());
     }
 
     private JobResponse toResponse(Job job) {
