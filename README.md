@@ -28,6 +28,12 @@ The application starts on `http://localhost:8080`. The default profile uses a
 file-backed H2 database at `assessment/data/`.
 
 ## Tests
+Run unit test only with 
+
+```bash
+cd assessment
+./mvnw test
+```
 
 Run unit and integration tests with:
 
@@ -36,7 +42,7 @@ cd assessment
 ./mvnw verify
 ```
 
-The integration tests use an in-memory H2 database and the `test` profile.
+The integration tests use an in-memory H2 database and the `test` profile - and it would not affect the persistent db
 
 ## API
 For convenience, import the Postman collection at `postman/Naviko - Tech Assessment.postman_collection.json` and use it to test the endpoints.
@@ -127,6 +133,8 @@ job.max-retries=3
 
 ## System Design: Scaling to One Million Jobs per Day
 
+![Production job-processing flow](docs/system-design-flow.svg)
+
 At production scale, I would separate job submission from job execution. The
 API would validate the request and persist the job, then publish a job ID to a
 durable queue or broker. Workers would consume messages and update job state in
@@ -148,7 +156,7 @@ database would use connection-pool limits, retention/archive policies, backups,
 and a migration tool such as Flyway or Liquibase instead of runtime schema
 updates.
 
-## Database Performance: Fifty Million Jobs
+## Database Performance: 50 Million Jobs
 
 I would first capture the slow query and measure its latency, frequency,
 returned rows, and execution plan with `EXPLAIN` or `EXPLAIN ANALYZE`. I would
@@ -159,8 +167,8 @@ connection-pool usage, and concurrent traffic.
 The likely first improvement is an index matching the filter and ordering, for
 example `(status, created_at DESC, id)`; the exact definition should be checked
 against the database engine and query plan. I would refresh statistics and
-confirm that pagination uses the index. For deep pages, I would replace
-offset-based pagination with keyset pagination using the last `(created_at,
+confirm that pagination uses the index. For that much records, I would replace
+offset-based pagination with cursor-based pagination using the last `(created_at,
 id)` pair, which avoids scanning and discarding a growing number of rows.
 
 For long-term growth, completed and old jobs could be archived or partitioned
